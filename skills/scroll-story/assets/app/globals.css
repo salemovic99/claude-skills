@@ -1,0 +1,179 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* ===========================================================================
+   TEMPLATE — replace the color values with the project's palette. The structure
+   (token names, utilities, reduced-motion floor) should stay as-is.
+   =========================================================================== */
+
+/* The dark variant is class-scoped and never activated — this is a fixed,
+   art-directed palette, not a themeable app. Without this override, OS dark-mode
+   repaints shadcn component internals and the art direction breaks.
+   Chapters that go dark paint themselves with explicit colors instead. */
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* shadcn semantic tokens — every ui/ component inherits the brand from these */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* The single brand accent — used sparingly: glows, focus rings, key words. */
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-foreground: var(--brand-foreground);
+
+  /* Typography — variables set by next/font in app/layout.tsx */
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-display);
+  --font-heading: var(--font-display);
+  --font-mono: var(--font-jetbrains);
+
+  /* Radii */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.4);
+
+  /* Shadow ramp + accent glow */
+  --shadow-soft: 0 1px 2px rgb(28 25 23 / 0.04), 0 12px 32px -12px rgb(28 25 23 / 0.1);
+  --shadow-glass: 0 8px 40px -12px rgb(28 25 23 / 0.14);
+  --shadow-lift: 0 24px 70px -24px rgb(28 25 23 / 0.22);
+  --shadow-glow: 0 0 60px -8px rgb(from var(--brand) r g b / 0.3);
+}
+
+:root {
+  --background: #fafaf9;
+  --foreground: #0c0a09;
+  --card: #ffffff;
+  --card-foreground: #0c0a09;
+  --popover: #ffffff;
+  --popover-foreground: #0c0a09;
+  --primary: #1c1917;
+  --primary-foreground: #fafaf9;
+  --secondary: #f5f5f4;
+  --secondary-foreground: #1c1917;
+  --muted: #e8ecf0;
+  --muted-foreground: #57534e;
+  /* shadcn's internal accent stays neutral (hover fills etc.) — the brand accent
+     is a separate token so hover states don't shout. */
+  --accent: #f5f5f4;
+  --accent-foreground: #1c1917;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #d6d3d1;
+  --input: #e7e5e4;
+  --ring: var(--brand);
+
+  /* ← the one voice. Replace. */
+  --brand: #4f46e5;
+  --brand-soft: #6366f1;
+  --brand-foreground: #ffffff;
+
+  --radius: 0.875rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* Floating/off-canvas objects must never produce a horizontal scrollbar. */
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--brand) 22%, transparent);
+    color: var(--foreground);
+  }
+}
+
+/* ---- Utilities the rigs depend on -------------------------------------- */
+
+@utility glass {
+  background: color-mix(in srgb, var(--card) 62%, transparent);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+  box-shadow: var(--shadow-glass);
+}
+
+@utility glass-dark {
+  background: color-mix(in srgb, #0c0a09 46%, transparent);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  border: 1px solid rgb(255 255 255 / 0.08);
+}
+
+/* Accent gradient fill for display copy.
+   MUST sit on the element whose own opacity is animated — background-clip:text
+   paints on the element that owns the background, so a parent-level gradient
+   cannot be faded by a child. This trips everyone once. */
+@utility brand-gradient-text {
+  background-image: linear-gradient(to right, var(--brand), var(--brand-soft));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Fixed dot-grid texture (pair with a BackgroundDots component). */
+@utility dot-grid {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--brand) 22%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 20px 20px;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 75%, transparent 100%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 75%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* Fixed film-grain plate (pair with GrainOverlay). */
+@utility grain-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+}
+
+/* ---- Accessibility floor ------------------------------------------------
+   Backs up the JS layers: honors reduced-motion even for CSS animation that
+   never passes through Framer. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
